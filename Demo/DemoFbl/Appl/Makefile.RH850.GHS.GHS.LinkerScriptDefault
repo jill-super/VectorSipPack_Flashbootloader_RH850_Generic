@@ -1,0 +1,123 @@
+#######################################################################################################################
+# File Name  : Makefile.RH850.GHS.GHS.LinkerScriptDefault                                                             #
+# Description: Default Linker/Symbol Preprocessor command file generation                                             #
+# Project    : Vector Basic Runtime System                                                                            #
+# Module     : BrsHw for Platform Renesas RH850                                                                       #
+#              and Compiler GreenHills                                                                                #
+#                                                                                                                     #
+#---------------------------------------------------------------------------------------------------------------------#
+# COPYRIGHT                                                                                                           #
+#---------------------------------------------------------------------------------------------------------------------#
+# Copyright (c) 2018 by Vector Informatik GmbH.                                                  All rights reserved. #
+#                                                                                                                     #
+#---------------------------------------------------------------------------------------------------------------------#
+# AUTHOR IDENTITY                                                                                                     #
+#---------------------------------------------------------------------------------------------------------------------#
+# Name                          Initials      Company                                                                 #
+# ----------------------------  ------------  ------------------------------------------------------------------------#
+# Steffen Frank                 visfsn        Vector Informatik GmbH                                                  #
+# Benjamin Walter               visbwa        Vector Informatik GmbH                                                  #
+# Jan Lutterbeck                visljn        Vector Informatik GmbH                                                  #
+# David Feuerstein              visdfe        Vector Informatik GmbH                                                  #
+# Sascha Mauser                 vismaa        Vector Informatik GmbH                                                  #
+#---------------------------------------------------------------------------------------------------------------------#
+# REVISION HISTORY                                                                                                    #
+#---------------------------------------------------------------------------------------------------------------------#
+# Version   Date        Author  Description                                                                           #
+# --------  ----------  ------  --------------------------------------------------------------------------------------#
+# 01.00.00  2014-06-10  visfsn  Initial version                                                                       #
+# 01.01.00  2014-06-17  visfsn  Changed variable for memory mapping                                                   #
+# 01.02.00  2014-07-30  visbwa  Adaptions for new BRS code structure                                                  #
+# 01.02.01  2014-08-27  visljn  Linker labels for SDA optimization added                                              #
+# 01.02.02  2014-09-02  visdfe  Added Data and Const Section for Mcal Fls Driver                                      #
+# 01.03.00  2016-06-20  visbwa  adapted file header according to Brs_Template 2.00.01                                 #
+# 01.04.00  2016-09-09  visbwa  Vectable separated, Makefile.RH850.GHS.GHS.LinkerScriptMultiCore introduced           #
+# 01.04.01  2017-04-28  visbwa  Renamed LD_FILE_DEFAULT by LD_FILE directly                                           #
+# 01.05.00  2018-01-18  visbwa  Removed outdated support for old OS (only OsGen7 supported within different file)     #
+# 01.05.01  2018-01-30  vismaa  Added symbol _EXCEPTIONTABLE_START_ADDR and _VECTORTABLE_START_ADDR for usage in      #
+#                               the startupcode                                                                       #
+#######################################################################################################################
+
+# Interrupt Vector Table base address for MasterCore
+INTVECT_COREEXCEPTIONS_CORE0 = 0x00
+INTVECT_EXTERNALINT_CORE0 =    0x200
+
+#------------------------------------------------------------------------------
+# rule to generate linker command file
+#------------------------------------------------------------------------------
+
+#############################################################################################################################################
+# MAIN LINKER SCRIPT CODE
+#############################################################################################################################################
+define LD_FILE
+     $(ECHO) "MEMORY"                                                                                                                   > $@; \
+     $(ECHO) " {"                                                                                                                      >> $@; \
+     $(ECHO) "  /* FLASH */"                                                                                                           >> $@; \
+     $(ECHO) "  iVect       : ORIGIN = 0x00000000, LENGTH = 0x100"                                                                     >> $@; \
+     $(ECHO) "  iFbl        : ORIGIN = 0x0000200, LENGTH = 0x10000-0x200"                                                              >> $@; \
+     $(ECHO) "  iAppl       : ORIGIN = 0x00018000, LENGTH = 0x010000"                                                                  >> $@; \
+     $(ECHO) "  iFlashDrv   : ORIGIN = 0xFEDE0000, LENGTH = 0x3000"                                                                    >> $@; \
+     $(ECHO) "  iRAM        : ORIGIN = 0xFEDE3000, LENGTH = 0x1C000"                                                                   >> $@; \
+     $(ECHO) "  iStack      : ORIGIN = 0xFEDFF000, LENGTH = 0x1000"                                                                    >> $@; \
+     $(ECHO) "}"                                                                                                                       >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) "SECTIONS {"                                                                                                              >> $@; \
+     $(ECHO) "   /* FLASH (User Area) */"                                                                                              >> $@; \
+     $(ECHO) "  .intvect                            :>iVect /* Start of interrupt vector table */"                                     >> $@; \
+     $(ECHO) "  .vectram                            :>.     /* constant datas in ZDA area */"                                          >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) "  .FBLHEADER                          :>iFbl  /* Bootloader header table */"                                             >> $@; \
+     $(ECHO) "  .startup .: { "                                                                                                        >> $@; \
+     $(ECHO) "    startup.o(.text)"                                                                                                    >> $@; \
+     $(ECHO) "  }"                                                                                                                     >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) "  /* START OF CONST AREA */"                                                                                             >> $@; \
+     $(ECHO) "  .rozdata                               :>. /* constant datas in ZDA area */"                                           >> $@; \
+     $(ECHO) "  .robase                align(4)        :>. /* initialize textpointer TP for SDA addressing */"                         >> $@; \
+     $(ECHO) "  .rosdata               align(4)        :>. /* constant datas in SDA area */"                                           >> $@; \
+     $(ECHO) "  .rodata                align(4)        :>. /* constant datas in normal area */"                                        >> $@; \
+     $(ECHO) "  /* END OF CONST AREA */"                                                                                               >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) "  .text                    align(4)   :>.     /* program code area */"                                                   >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) "  .fixaddr               align(4)        :>. /* ghs internal (compiler) */"                                              >> $@; \
+     $(ECHO) "  .fixtype               align(4)        :>. /* ghs internal (compiler) */"                                              >> $@; \
+     $(ECHO) "  .secinfo               align(4)        :>. /* ghs internal (runtime library) */"                                       >> $@; \
+     $(ECHO) "  .syscall               align(4)        :>. /* ghs internal (linker) */"                                                >> $@; \
+     $(ECHO) "  .romtext  ROM(.RAMCODE)           :>.     /* RAM text section (copied to RAM at startup)*/"                            >> $@; \
+     $(ECHO) "  .romconst ROM(.RAMCONST)          :>.     /* constant data to initialize variables (copied to RAM at startup)*/"       >> $@; \
+     $(ECHO) "  .ROM.ramcopy align(4) ROM(.ramcopy) :>.     /* ROM copy to initialize text in ramcopy area */"                         >> $@; \
+     $(ECHO) "  .romdata  ROM(.data)                :>.     /* constant data to initialize variables (copied to RAM at startup)*/"     >> $@; \
+     $(ECHO) "  .romzdata ROM(.zdata)        :>.   /* constant data to initialize variables in ZDA area (copied to RAM at startup)*/ " >> $@; \
+     $(ECHO) "  .romsdata ROM(.sdata)        :>.   /* constant data to initialize variables in SDA area (copied to RAM at startup)*/ " >> $@; \
+     $(ECHO) "  .romtdata ROM(.tdata)        :>.   /* constant data to initialize variables in TDA area (copied to RAM at startup)*/ " >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) "  .APPLVECT                           :>iAppl /* Application interrupt vector table if FBL is used */"                   >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) "  /* RAM*/"                                                                                                              >> $@; \
+     $(ECHO) "  .sdabase                 align(4)   :>iFlashDrv /* initialize globalpointer GP for SDA addressing */"                  >> $@; \
+     $(ECHO) "  .FLASHDRV                align(4)   :>.         /* Space for FlashCode */ "                                            >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) "  .EEPDATA      align(4)               :>iRAM     /* Space for DummyEep */"                                              >> $@; \
+     $(ECHO) "  .data                                :>.  /* initialized data */"                                                      >> $@; \
+     $(ECHO) "  .FBLMAGIC                align(4)    :>.     /*  */ "                                                                  >> $@; \
+     $(ECHO) "  .ramcopy                 align(4)    :>.       /* Initialized code segment in RAM */"                                  >> $@; \
+     $(ECHO) "  .RAMCODE  align(4)               :>.     /* RAM code */"                                                               >> $@; \
+     $(ECHO) "  .RAMCONST align(4)               :>.     /* RAM const */"                                                              >> $@; \
+     $(ECHO) "  .bss      align(4)               :>.     /* zero initialized data*/"                                                   >> $@; \
+     $(ECHO) "  .sdata                 align(4)        :>. /* initialized data in SDA area */"                                         >> $@; \
+     $(ECHO) "  .sbss                    align(4)    :>.     /* zero initialized data in SDA area*/"                                   >> $@; \
+     $(ECHO) "  .sda_end                               :>. /* end of SDA RAM area */"                                                  >> $@; \
+     $(ECHO) "  /* END OF SDA RAM AREA */"                                                                                             >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) "  .zdata                 align(4)                :>. /* initialized data in ZDA area */"                                 >> $@; \
+     $(ECHO) "  .zbss                  align(4) :>.           /* zero initialized data in ZDA area */"                                 >> $@; \
+     $(ECHO) "  .tdata                 align(4) MAX_SIZE(256)  :>. /* initialized and zero-initialized data in TDA area */"            >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) "  .stack        align(4) pad(0x1000)   :>iStack  /* definition of stack size */"                                         >> $@; \
+     $(ECHO) "  .ram_end               align(16)               :>."                                                                    >> $@; \
+     $(ECHO) ""                                                                                                                        >> $@; \
+     $(ECHO) " }"                                                                                                                      >> $@; \
+     $(ECHO) "-sda"                                                                                                                    >> $@;
+endef

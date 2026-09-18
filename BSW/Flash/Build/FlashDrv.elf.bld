@@ -1,0 +1,9 @@
+#!build                        
+default:                       
+        program                
+        :compilation=assembly  
+        :sourcedirs=..\..\..\BSW\Flash  
+FlashDrv.ld  
+        linker_file            
+FlashDrv.rc             
+        custom                 

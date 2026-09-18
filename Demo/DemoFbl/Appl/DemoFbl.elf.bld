@@ -1,0 +1,11 @@
+#!build                        
+default:                       
+        program                
+        :compilation=assembly  
+        :sourcedirs=..\..\..\BSW\Eep  
+        :sourcedirs=..\..\..\BSW\Fbl  
+        :sourcedirs=..\..\..\BSW\SecMod  
+DemoFbl.ld  
+        linker_file            
+DemoFbl.rc             
+        custom                 

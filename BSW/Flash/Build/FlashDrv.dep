@@ -1,0 +1,27 @@
+# this file is generated automatically by MakeSupport
+
+obj/flashdrv.o: ../../../BSW/Flash/flashdrv.c Makefile.config  \
+ ../../../BSW/Flash/flashdrv.h ../flashlib/r_typedefs.h \
+ ../flashlib/fcl_cfg.h ../flashlib/r_fcl_types.h \
+ ../flashlib/r_fcl_global.h ../flashlib/r_fcl.h \
+ ../flashlib/r_fcl_env.h
+obj/r_fcl_hw_access.o: ../FlashLib/r_fcl_hw_access.c Makefile.config  \
+ ../FlashLib/r_typedefs.h ../FlashLib/fcl_cfg.h \
+ ../FlashLib/r_fcl_types.h ../FlashLib/r_fcl_global.h \
+ ../FlashLib/r_fcl_env.h
+obj/r_fcl_user_if.o: ../FlashLib/r_fcl_user_if.c Makefile.config  ../FlashLib/r_typedefs.h \
+ ../FlashLib/fcl_cfg.h ../FlashLib/r_fcl_types.h \
+ ../FlashLib/r_fcl_global.h ../FlashLib/r_fcl.h \
+ ../FlashLib/r_fcl_env.h
+
+# Manual file dependencies
+  
+
+# Assembler file dependencies
+
+obj/r_fcl_hw_access_asm.o: ../FlashLib/r_fcl_hw_access_asm.850 Makefile.config
+
+
+
+lib/libFBLDRVFLASH_RH850RV40HIS_IMPL_MAIN.lib:  obj/flashdrv.o 
+lib/libFlashDrv.lib:  

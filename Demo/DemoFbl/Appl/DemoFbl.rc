@@ -1,0 +1,23 @@
+/* ICE setup */ 
+connect 850eserv2 -rh850 -e1lpd4=11000 -dclock=16000,0,swoff -df=D:\Complier_Installed\GHS_RH850_V2015_1_7\rh850\DR7F701313.dvf -id ffffffffffffffffffffffffffffffff -noiop 
+                                         
+/* Set target clock */                   
+target dclock 16000 0 swoff 
+                                         
+/* Disable interrupts */                 
+target reg psw=0x0020                    
+                                         
+/* Unmask reset sources */               
+target pinmask k                         
+                                         
+/* load program and go to main */        
+load DemoFbl.elf    
+                                         
+/* Set breakpoint to main */             
+b main                                   
+                                         
+/* Reset target */                       
+target rst                               
+                                         
+/* Run application*/                     
+c                                        
